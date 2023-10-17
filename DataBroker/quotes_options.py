@@ -1,4 +1,4 @@
-from DataBroker.main import Main, get_caller_info
+from DataBroker.main import Main
 from DataBroker.Sources.SymbolsUniverse.holidayCalendar import getHolidaySchedule
 import pytz
 from datetime import datetime
@@ -12,7 +12,6 @@ def quotes_options(debug=False,fullMarket=False):
     holidays = getHolidaySchedule()
     nyt = pytz.timezone('America/New_York')
     localDate = pytz.utc.localize(datetime.utcnow(), is_dst=None).astimezone(nyt).date()
-    caller = get_caller_info()
     main = Main(
         postgresParams={
             "host": f'{POSTGRES_LOCATION}',
@@ -51,8 +50,7 @@ def quotes_options(debug=False,fullMarket=False):
             "Movers":"EQUITY",
             "Sectors":"EQUITY"
         },
-        moversOnly=False,
-        caller=caller)
+        moversOnly=False)
     if localDate not in holidays: 
         main.runTdRequests(minute=False,daily=False,weekly=False,quote=True,fundamentals=False,options=True,fullMarket=fullMarket)
     else:

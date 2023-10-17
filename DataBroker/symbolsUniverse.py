@@ -1,4 +1,3 @@
-from DataBroker.main import get_caller_info
 from DataBroker.Sources.SymbolsUniverse.symbols import SymbolsUniverse
 from DataBroker.Sources.SymbolsUniverse.holidayCalendar import getHolidaySchedule
 import pytz
@@ -24,7 +23,6 @@ def symbolsUniverse(debug=False):
     nyt = pytz.timezone('America/New_York')
     localDate = pytz.utc.localize(datetime.utcnow(), is_dst=None).astimezone(nyt).date()
     if localDate not in holidays:
-        caller = get_caller_info()
         sym = SymbolsUniverse(postgresParams={
                 "host": f'{POSTGRES_LOCATION}',
                 "port": f'{POSTGRES_PORT}',
@@ -32,7 +30,7 @@ def symbolsUniverse(debug=False):
                 "user": f'{POSTGRES_USER}',
                 "password": f'{POSTGRES_PASSWORD}',
                 "application_name": f'{APP_NAME}SymbolsUni'
-            },debug=debug,caller=caller,startTime=startTime)       
+            },debug=debug,startTime=startTime)       
         sym.getListedSymbols()
     else:
         sym.log.info(str(localDate) + ' is a Holiday')

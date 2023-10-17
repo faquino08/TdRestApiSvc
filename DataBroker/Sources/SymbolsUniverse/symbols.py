@@ -1,5 +1,6 @@
 import os
 import logging
+import inspect
 from ftplib import FTP
 import time
 import pytz
@@ -16,15 +17,13 @@ from tdQuoteFlaskDocker.constants import DEBUG, APP_NAME
 from  DataBroker.Sources.TDAmeritrade.database import databaseHandler
 
 class SymbolsUniverse:
-    def __init__(self,postgresParams={},debug=False,insert=False,caller='',startTime=0):
+    def __init__(self,postgresParams={},debug=False,insert=False,startTime=0):
         '''
         Class to grab US symbols universe from nasdaq five days a week.
         postgresParams -> Dict with keys host, port, database, user, \
                             password for Postgres database
         debug   -> Whether to record debug logs
         insert  -> Whether to insert data into database
-        caller  ->   (str) Name of file calling the workflow for recording run\
-                            history
         startTime   -> (int) Start time of workflow in Epoch   
         '''
         self.nyt = pytz.timezone('America/New_York')
@@ -147,11 +146,9 @@ class SymbolsUniverse:
         self.conn = self.db.conn
         #self.connAlch = self.db.connAlch
         self.cur = self.db.cur
-        #self.conn = psycopg2.connect(**self.param_dic)
-        #alchemyStr = f"postgresql+psycopg2://{self.param_dic['user']}:{self.param_dic['password']}@{self.param_dic['host']}/{self.param_dic['database']}?application_name={APP_NAME}_symbols_Alchemy"
-        #self.connAlch = create_engine(alchemyStr).connect()
-        #self.cur = self.conn.cursor()
 
+        caller = inspect.stack()[1][3].upper()
+        # Create New Run in RunHistory
         self.db.cur.execute('''
             INSERT INTO PUBLIC.financedb_RUNHISTORY ("Process","Startime","SymbolsToFetch") VALUES ('%s','%s',1) RETURNING "Id";
         ''' % (caller,startTime))

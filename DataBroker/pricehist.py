@@ -1,10 +1,10 @@
-from DataBroker.main import Main, get_caller_info
+from DataBroker.main import Main
 from DataBroker.Sources.SymbolsUniverse.holidayCalendar import getHolidaySchedule
 import pytz
 from datetime import datetime
 from constants import POSTGRES_LOCATION, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, DEBUG, APP_NAME
 
-def PriceHist(debug=DEBUG,fullMarket=False):
+def priceHist(debug=DEBUG,fullMarket=False):
     '''
     Wrapper function to request  price history data from TD Ameritrade.
     debug -> (boolean) Whether to log debug messages
@@ -12,7 +12,6 @@ def PriceHist(debug=DEBUG,fullMarket=False):
     holidays = getHolidaySchedule()
     nyt = pytz.timezone('America/New_York')
     localDate = pytz.utc.localize(datetime.utcnow(), is_dst=None).astimezone(nyt).date()
-    caller = get_caller_info()
     main = Main(
         postgresParams={
             "host": f'{POSTGRES_LOCATION}',
@@ -51,8 +50,7 @@ def PriceHist(debug=DEBUG,fullMarket=False):
             "Movers":"EQUITY",
             "Sectors":"EQUITY"
         },
-        moversOnly=False,makeFreqTable=False,
-        caller=caller)
+        moversOnly=False,makeFreqTable=False)
     if localDate not in holidays: 
         main.runTdRequests(minute=True,daily=True,weekly=False,quote=False,fundamentals=False,options=False,fullMarket=fullMarket)
     else:

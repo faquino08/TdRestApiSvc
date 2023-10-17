@@ -16,20 +16,8 @@ from sqlalchemy import create_engine
 from constants import DEBUG, APP_NAME
 from  DataBroker.Sources.TDAmeritrade.database import databaseHandler
 
-def get_caller_info():
-  # first get the full filename (including path and file extension)
-  caller_frame = inspect.stack()[1]
-  caller_filename_full = caller_frame.filename
-  # now get rid of the directory (via basename)
-  # then split filename and extension (via splitext)
-  #caller_filename_only = os.path.splitext(os.path.basename(caller_filename_full))[0]
-  caller = caller_filename_full.rsplit('/')[-1].split('.')[0].upper()
-
-  # return filename only
-  return caller
-
 class Main:
-    def __init__(self,postgresParams={},debug=False,client_id='',tablesToInsert=[],symbolTables={},assetTypes={},moversOnly=False,makeFreqTable=True,caller=''):
+    def __init__(self,postgresParams={},debug=False,client_id='',tablesToInsert=[],symbolTables={},assetTypes={},moversOnly=False,makeFreqTable=True):
         '''
         Main class for running different workflows for TD Ameritrade API requesta and getting universe of symbols.
         postgresParams -> (dict) Dict with keys host, port, database, user, \
@@ -44,8 +32,6 @@ class Main:
                             key in symbolTables and keys must be the same for \
                             both
         moversOnly -> (boolean) Whether to only run movers request
-        caller ->   (str) Name of file calling the workflow for recording run\
-                            history
         '''
         self.movers = moversOnly
         nyt = pytz.timezone('America/New_York')
@@ -76,7 +62,9 @@ class Main:
         self.log.info(f'Main')
         self.log.info(f'Starting Run at: {self.startTime}')
         self.connect()
-        #caller = get_caller_info(self.log)
+        
+        caller = inspect.stack()[1][3].upper()
+        # Create New Run in RunHistory
         self.db.cur.execute('''
             INSERT INTO PUBLIC.financedb_RUNHISTORY ("Process","Startime") VALUES ('%s','%s') RETURNING "Id";
         ''' % (caller,self.startTime))
@@ -107,7 +95,7 @@ class Main:
         self.endTime = time.time()
         # Update RunHistory With EndTime
         if not self.lastSymbol:
-            self.lastSymbol = ''
+            self.lastSymbol = 'Null'
         self.db.cur.execute('''
             UPDATE PUBLIC.financedb_RUNHISTORY
             SET "Endtime"=%s,
@@ -159,6 +147,7 @@ class Main:
             self.totalLen = 3
             self.td.resetAttemptCount()
             # Update RunHistory With Length Of Queue
+            self.log.info('Updating runhistory Queue')
             self.db.cur.execute('''
                 UPDATE PUBLIC.financedb_RUNHISTORY
                 SET "SymbolsToFetch"=1
@@ -178,7 +167,8 @@ class Main:
                 self.log.info("lastTime['weekly']: " + str(self.td.lastTime['weekly']))
         except (Exception) as error:
             self.log.error(error)
-        self.log.info('Updating runhistory')
+        # Update RunHistory With Length Of Queue
+        self.log.info('Updating runhistory Queue')
         self.db.cur.execute('''
             UPDATE PUBLIC.financedb_RUNHISTORY
             SET "SymbolsToFetch"=%s
@@ -188,8 +178,7 @@ class Main:
         for row in tdSymbols.itertuples():
             index = row.Index
             d = {"name": index, "td_service_name": row.td_service_name}
-            sym = SimpleNamespace(**d)
-            # Update RunHistory With Length Of Queue          
+            sym = SimpleNamespace(**d)   
             if minute:
                 self.td.resetAttemptCount()
                 self.td.makeRequest(sym,'price','minute')

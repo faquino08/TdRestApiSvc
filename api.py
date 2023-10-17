@@ -24,7 +24,7 @@ from DataBroker.quotes_options import quotes_options
 from DataBroker.fundamentals import fundamentals
 from DataBroker.symbolsUniverse import symbolsUniverse
 from DataBroker.equity_freq import equity_freq
-from DataBroker.price_hist import PriceHist
+from DataBroker.pricehist import PriceHist
 
 # Custom Convert
 import werkzeug
@@ -148,11 +148,11 @@ def create_app(db_location,debug=False):
 
     @scheduler.task('cron', id='price_hist_optionable', minute='50', hour='00', day_of_week='tue-fri', timezone='America/New_York')
     def runPriceHist_Optionable():
-        return PriceHist(debug=DEBUG)
+        return priceHist(debug=DEBUG)
 
     @scheduler.task('cron', id='price_hist_full', minute='0', hour='3', day_of_week='sat', timezone='America/New_York')
     def runPriceHist_FullMarket():
-        return PriceHist(debug=DEBUG,fullMarket=True)
+        return priceHist(debug=DEBUG,fullMarket=True)
 
     @app.route('/runPriceHist', methods=['POST'])
     def postPriceHist():

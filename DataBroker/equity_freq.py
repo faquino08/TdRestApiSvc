@@ -1,4 +1,4 @@
-from DataBroker.main import Main, get_caller_info
+from DataBroker.main import Main
 import pytz
 from datetime import datetime
 from constants import POSTGRES_LOCATION, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, DEBUG, APP_NAME
@@ -8,7 +8,6 @@ def equity_freq(debug=DEBUG):
     Wrapper function to calculate frequency of equities in indices.
     debug -> (boolean) Whether to log debug messages
     '''
-    caller = get_caller_info()
     main = Main(
         postgresParams={
             "host": f'{POSTGRES_LOCATION}',
@@ -47,8 +46,7 @@ def equity_freq(debug=DEBUG):
             "Movers":"EQUITY",
             "Sectors":"EQUITY"
         },
-        moversOnly=True,
-        caller=caller
+        moversOnly=True
     )
     main.runEquityFreqTable()
     main.exit()
