@@ -33,6 +33,7 @@ class Main:
                             both
         moversOnly -> (boolean) Whether to only run movers request
         '''
+        self.lastSymbol = False
         self.movers = moversOnly
         nyt = pytz.timezone('America/New_York')
         self.today = datetime.datetime.now(tz=nyt).date()
