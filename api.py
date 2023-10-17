@@ -24,7 +24,7 @@ from DataBroker.quotes_options import quotes_options
 from DataBroker.fundamentals import fundamentals
 from DataBroker.symbolsUniverse import symbolsUniverse
 from DataBroker.equity_freq import equity_freq
-from DataBroker.pricehist import PriceHist
+from DataBroker.pricehist import priceHist
 
 # Custom Convert
 import werkzeug
