@@ -112,7 +112,6 @@ class tdRequests:
         self.log.info("Exiting Td Ameritrade")
         self.log.info(f'Ending Run at: {self.endTime}')
         self.log.info(f'Runtime: {self.endTime - self.startTime}')
-        self.db.exit()
         return self.symbolsCount
 
     def calcDayMinEndDate(self,starttime='',endtime='',currentDatetime=datetime.datetime.today()):

@@ -92,6 +92,8 @@ class Main:
         '''
         Exit class. Log Runtime. And shutdown logging.
         '''
+        inserted = self.td.exit()
+        self.endTime = time.time()
         # Update RunHistory With EndTime
         if not self.lastSymbol:
             self.lastSymbol = 'Null'
@@ -102,12 +104,9 @@ class Main:
                 "LastSymbol"=%s
             WHERE "Id"=%s
         ''' % (self.endTime,inserted,self.lastSymbol,self.runId))
-        self.db.conn.commit()
+        self.db.conn.commit()    
 
-        inserted = self.td.exit()
-        self.endTime = time.time()
-        
-        #self.db.exit()
+        self.db.exit()
         #self.connAlch.close()
         #self.log.info('Db Exit Status:')
         #self.log.info('SqlAlchemy:')
@@ -215,6 +214,7 @@ class Main:
             SET "SymbolsToFetch"=0
             WHERE "Id"=%s
         ''' % self.runId)
+        self.db.conn.commit()
         self.queueSecurities(self.symbolTables,self.assetTypes)
         self.makeTdFrequencyTable()
         return
