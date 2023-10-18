@@ -92,8 +92,6 @@ class Main:
         '''
         Exit class. Log Runtime. And shutdown logging.
         '''
-        inserted = self.td.exit()
-        self.endTime = time.time()
         # Update RunHistory With EndTime
         if not self.lastSymbol:
             self.lastSymbol = 'Null'
@@ -105,7 +103,11 @@ class Main:
             WHERE "Id"=%s
         ''' % (self.endTime,inserted,self.lastSymbol,self.runId))
         self.db.conn.commit()
-        self.db.exit()
+
+        inserted = self.td.exit()
+        self.endTime = time.time()
+        
+        #self.db.exit()
         #self.connAlch.close()
         #self.log.info('Db Exit Status:')
         #self.log.info('SqlAlchemy:')
@@ -206,6 +208,13 @@ class Main:
         '''
         Get listed symbols and indices components and make tabulation of frequency.
         '''
+        # Update RunHistory With Length Of Queue
+        self.log.info('Updating runhistory Queue')
+        self.db.cur.execute('''
+            UPDATE PUBLIC.financedb_RUNHISTORY
+            SET "SymbolsToFetch"=0
+            WHERE "Id"=%s
+        ''' % self.runId)
         self.queueSecurities(self.symbolTables,self.assetTypes)
         self.makeTdFrequencyTable()
         return
