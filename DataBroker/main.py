@@ -85,7 +85,7 @@ class Main:
 
         if self.movers:
             return self.log.info("Movers Only Run")
-        else:
+        elif symbolTables.keys() != assetTypes.keys() and makeFreqTable:
             return self.log.error("Non Matching Keys in symbolTables & assetTypes")
 
     def exit(self):
@@ -506,7 +506,7 @@ class Main:
                                 or "Nasd100"=1 or "Russell"=1
                                 or "Sp400"=1 or "Sp500"=1  or "Movers"=1
                                 or "PennyOptions"=1 or "WeeklyOptions"=1)
-                    ''' % (index))
+                    ''' % (index,index))
             else:
                 # Returns every symbol in universe
                 self.db.cur.execute(
