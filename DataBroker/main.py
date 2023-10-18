@@ -64,7 +64,7 @@ class Main:
         self.log.info(f'Starting Run at: {self.startTime}')
         self.connect()
         
-        caller = inspect.stack()[1][3].upper()
+        caller = 'TD' + inspect.stack()[1][3].upper()
         # Create New Run in RunHistory
         self.db.cur.execute('''
             INSERT INTO PUBLIC.financedb_RUNHISTORY ("Process","Startime") VALUES ('%s','%s') RETURNING "Id";

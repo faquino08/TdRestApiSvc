@@ -147,7 +147,7 @@ class SymbolsUniverse:
         #self.connAlch = self.db.connAlch
         self.cur = self.db.cur
 
-        caller = inspect.stack()[1][3].upper()
+        caller = 'TD' + inspect.stack()[1][3].upper()
         # Create New Run in RunHistory
         self.db.cur.execute('''
             INSERT INTO PUBLIC.financedb_RUNHISTORY ("Process","Startime","SymbolsToFetch") VALUES ('%s','%s',1) RETURNING "Id";
