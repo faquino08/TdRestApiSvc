@@ -101,7 +101,7 @@ class Main:
             UPDATE PUBLIC.financedb_RUNHISTORY
             SET "Endtime"=%s,
                 "SymbolsInsert"=%s,
-                "LastSymbol"=%s
+                "LastSymbol"='%s'
             WHERE "Id"=%s
         ''' % (self.endTime,inserted,self.lastSymbol,self.runId))
         self.db.conn.commit()    

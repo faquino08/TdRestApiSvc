@@ -203,7 +203,7 @@ class SymbolsUniverse:
                 UPDATE PUBLIC.financedb_RUNHISTORY
                 SET "Endtime"=%s,
                     "SymbolsInsert"=%s,
-                    "LastSymbol"=%s
+                    "LastSymbol"='%s'
                 WHERE "Id"=%s
             ''' % (self.endTime,0,'NULL',self.runId))
             self.db.conn.commit()
