@@ -4,7 +4,7 @@ import pytz
 import logging
 from datetime import datetime
 import time
-from constants import POSTGRES_LOCATION, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, DEBUG, APP_NAME
+from constants import POSTGRES_LOCATION, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, APP_NAME
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ def symbolsUniverse(debug=False):
     nyt = pytz.timezone('America/New_York')
     localDate = pytz.utc.localize(datetime.utcnow(), is_dst=None).astimezone(nyt).date()
     if localDate not in holidays:
-        sym = SymbolsUniverse(postgresParams={
+        sym = SymbolsUniverse(postgres={
                 "host": f'{POSTGRES_LOCATION}',
                 "port": f'{POSTGRES_PORT}',
                 "database": f'{POSTGRES_DB}',

@@ -2,7 +2,7 @@ from DataBroker.main import Main
 from DataBroker.Sources.SymbolsUniverse.holidayCalendar import getHolidaySchedule
 import pytz
 from datetime import datetime
-from constants import POSTGRES_LOCATION, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, DEBUG, APP_NAME
+from constants import POSTGRES_LOCATION, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, APP_NAME
 
 def quotes_options(debug=False,fullMarket=False):
     '''

@@ -1,23 +1,30 @@
 import os
 import logging
 import inspect
+from typing import Union
 from ftplib import FTP
 import time
 import pytz
 import pandas as pd
-import pandas.io.sql as sqlio
-from datetime import date, timedelta, datetime, timezone
+from datetime import timedelta, datetime, timezone
 import psycopg2
 import psycopg2.extras
-from io import StringIO
 import os
-from sqlalchemy import create_engine
-from pytest import param
-from tdQuoteFlaskDocker.constants import DEBUG, APP_NAME
+from tdQuoteFlaskDocker.constants import DEBUG
 from  DataBroker.Sources.TDAmeritrade.database import databaseHandler
 
+logger = logging.getLogger(__name__)
+
+params = {
+    "host": '',
+    "port": '',
+    "database": '',
+    "user": '',
+    "password": ''
+}
+
 class SymbolsUniverse:
-    def __init__(self,postgresParams={},debug=False,insert=False,startTime=0):
+    def __init__(self,postgres: Union[databaseHandler,dict],debug=False,insert=False,startTime=0):
         '''
         Class to grab US symbols universe from nasdaq five days a week.
         postgresParams -> Dict with keys host, port, database, user, \
@@ -27,22 +34,24 @@ class SymbolsUniverse:
         startTime   -> (int) Start time of workflow in Epoch   
         '''
         self.nyt = pytz.timezone('America/New_York')
-        if DEBUG:
-            logging.basicConfig(
-                level=logging.DEBUG,
-                format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
-                datefmt="%m-%d %H:%M:%S",
-                handlers=[logging.FileHandler(f'./logs/tdameritradeFlask_{datetime.now(tz=self.nyt).date()}.txt'), logging.StreamHandler()],
-            )
+        if logger != None:
+            self.log = logger
         else:
+            loggingLvl = logging.DEBUG if DEBUG else logging.INFO
             logging.basicConfig(
-                level=logging.INFO,
+                level=loggingLvl,
                 format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
                 datefmt="%m-%d %H:%M:%S",
-                handlers=[logging.FileHandler(f'./logs/tdameritradeFlask_{datetime.now(tz=self.nyt).date()}.txt'), logging.StreamHandler()],
+                handlers=[logging.FileHandler(f'./logs/tdameritradeFlask_{datetime.datetime.now(tz=self.nyt).date()}.txt'), logging.StreamHandler()],
             )
-        self.log = logging.getLogger(__name__)
-        self.param_dic = postgresParams
+        
+        if type(postgres) == databaseHandler:
+            self.db = postgres
+        else:
+            if not all(x in postgres for x in params):
+                raise ValueError(f'SymbolsUniverse did not receive a valid value for postgres. Need to receive either an object of type {databaseHandler} or dict in format {params}')
+            self.postgres = postgres
+            self.db = databaseHandler(self.postgres)
 
         # Files to Download
         self.files_list = [
@@ -141,12 +150,6 @@ class SymbolsUniverse:
             "Updated"
         ]
         
-        # Connect to Postgres
-        self.db = databaseHandler(self.param_dic)
-        self.conn = self.db.conn
-        #self.connAlch = self.db.connAlch
-        self.cur = self.db.cur
-
         caller = 'TD' + inspect.stack()[1][3].upper()
         # Create New Run in RunHistory
         self.db.cur.execute('''
@@ -423,11 +426,11 @@ class SymbolsUniverse:
             self.log.error("Table not Recognized")
             return 1
         try:
-            psycopg2.extras.execute_values(self.cur, insert_sql, tuples)
-            self.conn.commit()
+            psycopg2.extras.execute_values(self.db.cur, insert_sql, tuples)
+            self.db.conn.commit()
         except (Exception, psycopg2.DatabaseError) as error:
             self.log.info("Error: %s" % error)
-            self.conn.rollback()
+            self.db.conn.rollback()
             return 1
         self.log.info("execute_values() done")
         return
@@ -453,11 +456,11 @@ class SymbolsUniverse:
         create_sql = f"CREATE TABLE IF NOT EXISTS {table}{cols};"
         self.log.debug(create_sql)
         try:
-            self.cur.execute(create_sql)
-            self.conn.commit()
+            self.db.cur.execute(create_sql)
+            self.db.conn.commit()
         except (Exception, psycopg2.DatabaseError) as error:
             self.log.error("Error: %s" % error)
-            self.conn.rollback()
+            self.db.conn.rollback()
 
         self.execute_values(pan,table)
         if os.path.exists(file):
@@ -539,11 +542,11 @@ class SymbolsUniverse:
         create_sql = f"CREATE TABLE IF NOT EXISTS \"{table}\"{cols};"
         self.log.debug(create_sql)
         try:
-            self.cur.execute(create_sql)
-            self.conn.commit()
+            self.db.cur.execute(create_sql)
+            self.db.conn.commit()
         except (Exception, psycopg2.DatabaseError) as error:
             self.log.error("Error: %s" % error)
-            self.conn.rollback()
+            self.db.conn.rollback()
         return
         
     def insertListedSymbols(self,table):

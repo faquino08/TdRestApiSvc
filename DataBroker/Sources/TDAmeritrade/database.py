@@ -2,19 +2,9 @@ import sys
 import logging
 import psycopg2
 import psycopg2.extras
-import os
-import re
-from os.path import exists
-import csv
-import datetime
-import time
-import glob
 import pandas as pd
-import numpy as np
 import locale
 from io import StringIO
-from sqlalchemy import create_engine
-from pyparsing import Regex
 from constants import APP_NAME
 
 logger = logging.getLogger(__name__)

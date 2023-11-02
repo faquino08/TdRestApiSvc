@@ -1,18 +1,8 @@
-FROM python:3.9.13-buster
+FROM sofraserv/financedb_base:test
 
 WORKDIR /var/www/tdQuoteFlaskDocker
+RUN    mkdir /var/www/tdQuoteFlaskDocker/logs
 
-RUN    apt-get update
-
-RUN    echo y | apt-get install unixodbc unixodbc-dev
-RUN    echo y | apt-get install locales
-RUN    echo y | apt-get install vsftpd
-RUN    echo y | apt-get install libpam-pwdfile
-RUN    sed -i 's/^# *\(en_US.UTF-8\)/\1/' /etc/locale.gen
-RUN    locale-gen en_US.UTF-8  
-ENV    LANG en_US.UTF-8  
-ENV    LANGUAGE en_US:en  
-ENV    LC_ALL en_US.UTF-8
 EXPOSE 18080
 
 COPY   requirements.txt requirements.txt

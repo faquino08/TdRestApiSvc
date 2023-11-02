@@ -1,5 +1,4 @@
 import datetime
-import pytz
 
 def datetimeField(current_datetime:datetime.datetime):
     if current_datetime.hour < 16:

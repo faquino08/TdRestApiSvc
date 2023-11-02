@@ -1,6 +1,4 @@
 from DataBroker.main import Main
-import pytz
-from datetime import datetime
 from constants import POSTGRES_LOCATION, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, DEBUG, APP_NAME
 
 def equity_freq(debug=DEBUG):

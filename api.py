@@ -1,17 +1,14 @@
 import logging
-from statistics import median_grouped
 import sys
 import datetime
 import pytz
 from os import path, environ
 from urllib import request
 import json
-import argparse
 
 sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
-from flask import Flask, request, g
-from flask_restful import Api
+from flask import Flask, request
 from flask_apscheduler import APScheduler
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.executors.pool import ThreadPoolExecutor
@@ -27,9 +24,7 @@ from DataBroker.equity_freq import equity_freq
 from DataBroker.pricehist import priceHist
 
 # Custom Convert
-import werkzeug
 from werkzeug.routing import PathConverter
-from packaging import version
 
 class EverythingConverter(PathConverter):
     regex = '.*?'

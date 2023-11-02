@@ -1,20 +1,23 @@
-from asyncio.log import logger
 import logging
 import inspect
-import os.path
 import datetime
 import time
 import pytz
 import psycopg2
 import psycopg2.extras
-from pprint import pprint
 import pandas as pd
-import pandas.io.sql as sqlio
-from DataBroker.Sources.TDAmeritrade.tdrequests import tdRequests as td
+from DataBroker.Sources.TDAmeritrade.tdrequests import TdRequests as td
 from types import SimpleNamespace
-from sqlalchemy import create_engine
-from constants import DEBUG, APP_NAME
+from constants import DEBUG
 from  DataBroker.Sources.TDAmeritrade.database import databaseHandler
+
+params = {
+    "host": '',
+    "port": '',
+    "database": '',
+    "user": '',
+    "password": ''
+}
 
 class Main:
     def __init__(self,postgresParams={},debug=False,client_id='',tablesToInsert=[],symbolTables={},assetTypes={},moversOnly=False,makeFreqTable=True):
@@ -71,7 +74,7 @@ class Main:
         ''' % (caller,self.startTime))
         self.runId = self.db.cur.fetchone()[0]
         self.db.conn.commit()
-        self.td = td(self.params,debug,client_id,tablesToInsert=tablesToInsert,dbHandler=self.db)
+        self.td = td(self.params,debug,client_id,tablesToInsert=tablesToInsert)
         
         '''lastDate = self.td.db.getLastDate('tdequityfrequencytable','added')
         if lastDate != self.today or lastDate == None:
@@ -599,6 +602,8 @@ class Main:
         try:
             # connect to the PostgreSQL server
             #self.log.debug('Connecting to the PostgreSQL database...')
+            if not all(x in self.params for x in params):
+                raise ValueError(f'Main did not receive a valid value for postgresParams. Need to receive dict in format {params}')
             self.db = databaseHandler(self.params)
             #self.connAlch = self.db.connAlch
             #alchemyStr = f"postgresql+psycopg2://{self.params['user']}:{self.params['password']}@{self.params['host']}/{self.params['database']}?application_name={APP_NAME}_Main_Alchemy"

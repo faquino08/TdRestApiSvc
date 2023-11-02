@@ -1,10 +1,8 @@
-from symtable import Symbol
-from pyparsing import Regex
 import requests
+from typing import Union
 import psycopg2
 import psycopg2.extras
 import pandas as pd
-import pandas.io.sql as sqlio
 import datetime
 import time
 import pytz
@@ -12,13 +10,23 @@ import math
 from ratelimiter import RateLimiter
 import logging
 from types import SimpleNamespace
-from  DataBroker.Sources.TDAmeritrade.database import databaseHandler
+from DataBroker.Sources.TDAmeritrade.database import databaseHandler
 import json
 import copy
 from constants import DEBUG
 
-class tdRequests:
-    def __init__(self,postgresParams={},debug=False,client_id='',tablesToInsert=[],dbHandler=None):
+logger = logging.getLogger(__name__)
+
+params = {
+    "host": '',
+    "port": '',
+    "database": '',
+    "user": '',
+    "password": ''
+}
+
+class TdRequests:
+    def __init__(self,postgres: Union[databaseHandler,dict],debug=False,client_id='',tablesToInsert=[]):
         '''
         Class to pull data on US Stocks from TD Ameritrade REST API.
         postgresParams -> (dict) Dict with keys host, port, database, user, \
@@ -34,28 +42,25 @@ class tdRequests:
         if len(client_id) > 0:
             self.client_id = client_id
             self.tableToInsert = tablesToInsert
-            if DEBUG:
-                logging.basicConfig(
-                    level=logging.DEBUG,
-                    format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
-                    datefmt="%m-%d %H:%M:%S",
-                    handlers=[logging.FileHandler(f'./logs/tdameritradeFlask_{datetime.datetime.now(tz=self.nyt).date()}.txt'), logging.StreamHandler()],
-                )
+            if logger != None:
+                self.log = logger
             else:
+                loggingLvl = logging.DEBUG if DEBUG else logging.INFO
                 logging.basicConfig(
-                    level=logging.INFO,
+                    level=loggingLvl,
                     format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
                     datefmt="%m-%d %H:%M:%S",
                     handlers=[logging.FileHandler(f'./logs/tdameritradeFlask_{datetime.datetime.now(tz=self.nyt).date()}.txt'), logging.StreamHandler()],
                 )
-            self.log = logging.getLogger(__name__)
-            self.postgres = postgresParams
-
-            # Connect to Postgres
-            if dbHandler is None:
+            
+            if type(postgres) == databaseHandler:
+                self.db = postgres
+            else:
+                if not all(x in postgres for x in params):
+                    raise ValueError(f'TdRequests did not receive a valid value for postgres. Need to receive either an object of type {databaseHandler} or dict in format {params}')
+                self.postgres = postgres
                 self.db = databaseHandler(self.postgres)
-            else:
-                self.db = dbHandler
+            
             self.startTime = time.time() 
             self.log.info(f'')
             self.log.info(f'')
