@@ -1,4 +1,4 @@
-# TdQuoteFlaskDocker
+# TdRestApiSvc
 
 Flask app that exposes an api for running workflows that get data from the TD Ameritrade REST API. Runs scheduled workflows to get price history, fundamental, and quote data.
 
