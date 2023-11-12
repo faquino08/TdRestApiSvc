@@ -2,6 +2,8 @@
 
 Flask app that exposes an api for running workflows that get data from the TD Ameritrade REST API. Runs scheduled workflows to get price history, fundamental, and quote data.
 
+<div align="center"><a href="https://github.com/faquino08/FinanceDb/blob/main/README.md">Main Repo of Services</a></div>
+
 # Docker Reference
 
 The following is a description of each env var key and value:
